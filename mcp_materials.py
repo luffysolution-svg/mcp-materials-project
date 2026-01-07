@@ -465,5 +465,10 @@ def compare_materials(material_ids: str) -> str:
         }, indent=2)
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the MCP server."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()
