@@ -1,0 +1,66 @@
+{
+  "name": "materials-project",
+  "displayName": "Materials Project",
+  "description": "MCP Server for Materials Project database - query material properties, crystal structures, and phase diagrams",
+  "version": "0.1.0",
+  "author": "luffysolution-svg",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/luffysolution-svg/mcp-materials-project"
+  },
+  "homepage": "https://github.com/luffysolution-svg/mcp-materials-project",
+  "bugs": "https://github.com/luffysolution-svg/mcp-materials-project/issues",
+  "installation": {
+    "type": "pip",
+    "package": "mcp-materials-project"
+  },
+  "config": {
+    "command": "mcp-materials-project",
+    "env": {
+      "MP_API_KEY": {
+        "description": "Materials Project API key from https://materialsproject.org/api",
+        "required": true
+      }
+    }
+  },
+  "capabilities": {
+    "tools": [
+      {
+        "name": "fetch_full_material_data",
+        "description": "Search materials by formula, elements, band gap, stability, and other criteria"
+      },
+      {
+        "name": "get_structure_details",
+        "description": "Get detailed crystal structure information for a specific material"
+      },
+      {
+        "name": "search_materials_by_property",
+        "description": "Search materials by specific property ranges (band gap, bulk modulus, density, etc.)"
+      },
+      {
+        "name": "get_phase_diagram_info",
+        "description": "Get phase diagram entries and stability information for a chemical system"
+      },
+      {
+        "name": "compare_materials",
+        "description": "Compare multiple materials side by side with key properties"
+      }
+    ]
+  },
+  "categories": [
+    "science",
+    "materials",
+    "chemistry",
+    "physics",
+    "research"
+  ],
+  "tags": [
+    "materials-science",
+    "crystallography",
+    "materials-project",
+    "crystal-structure",
+    "phase-diagram",
+    "computational-materials"
+  ]
+}
