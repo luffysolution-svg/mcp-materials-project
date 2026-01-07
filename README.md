@@ -12,7 +12,17 @@ An MCP (Model Context Protocol) server that provides access to the [Materials Pr
 
 ## Installation
 
+### From PyPI (Recommended)
+
 ```bash
+pip install mcp-materials-project
+```
+
+### From Source
+
+```bash
+git clone https://github.com/luffysolution-svg/mcp-materials-project.git
+cd mcp-materials-project
 pip install -r requirements.txt
 ```
 
@@ -29,6 +39,31 @@ set MP_API_KEY=your_api_key_here
 export MP_API_KEY=your_api_key_here
 ```
 
+### Claude Code Configuration
+
+Add to your `~/.claude/settings.json` or project `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "materials-project": {
+      "command": "mcp-materials-project",
+      "env": {
+        "MP_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+Or run directly:
+
+```bash
+claude mcp add materials-project -- mcp-materials-project
+```
+
+Then set the environment variable `MP_API_KEY` in your shell or add it to the config.
+
 ### Claude Desktop Configuration
 
 Add to your `claude_desktop_config.json`:
@@ -37,8 +72,7 @@ Add to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "materials-project": {
-      "command": "python",
-      "args": ["path/to/mcp_materials.py"],
+      "command": "mcp-materials-project",
       "env": {
         "MP_API_KEY": "your_api_key_here"
       }
