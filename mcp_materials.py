@@ -209,7 +209,18 @@ def process_material_doc(doc: Any) -> dict:
     result['Formula'] = doc_dict.get('formula_pretty', '')
     result['Formula_Anonymous'] = doc_dict.get('formula_anonymous', '')
     result['Chemical_System'] = doc_dict.get('chemsys', '')
-    result['Elements'] = ', '.join(doc_dict.get('elements', [])) if doc_dict.get('elements') else ''
+
+    # Handle elements - can be list of strings or list of dicts
+    elements = doc_dict.get('elements', [])
+    if elements:
+        if isinstance(elements[0], dict):
+            # Extract element symbols from dict
+            result['Elements'] = ', '.join(str(e.get('element', e)) if isinstance(e, dict) else str(e) for e in elements)
+        else:
+            result['Elements'] = ', '.join(str(e) for e in elements)
+    else:
+        result['Elements'] = ''
+
     result['N_Elements'] = doc_dict.get('nelements', '')
     result['N_Sites'] = doc_dict.get('nsites', '')
 
@@ -793,8 +804,8 @@ def _create_comparison_excel(materials_data: List[dict], output_path: str):
         for col_idx, mat in enumerate(materials_data, start=2):
             value = mat.get(prop_key, None)
 
-            # Format value - convert to string first to avoid comparison issues
-            if value is None or value == '':
+            # Format value - convert to string first to avoid MPID comparison issues
+            if value is None:
                 display_value = 'N/A'
             elif isinstance(value, bool):
                 display_value = str(value)
@@ -806,7 +817,10 @@ def _create_comparison_excel(materials_data: List[dict], output_path: str):
             else:
                 # Convert to string first
                 str_value = str(value)
-                display_value = str_value if str_value else 'N/A'
+                if str_value == '' or str_value == 'None':
+                    display_value = 'N/A'
+                else:
+                    display_value = str_value
 
             cell = ws.cell(row_idx, col_idx, display_value)
             cell.alignment = data_alignment
