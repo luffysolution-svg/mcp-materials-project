@@ -1,0 +1,39 @@
+{
+  "name": "materials-project-claude-skills",
+  "version": "1.0.0",
+  "description": "Claude Code skills for Materials Project database queries",
+  "main": "skills.json",
+  "scripts": {
+    "install-local": "cp skills.json ../.claude/skills.json",
+    "install-global": "cp skills.json ~/.claude/skills.json || copy skills.json %USERPROFILE%\\.claude\\skills.json",
+    "test": "python scripts/materials_search.py --material-id mp-149"
+  },
+  "keywords": [
+    "claude-code",
+    "skills",
+    "materials-project",
+    "materials-science",
+    "crystallography",
+    "computational-materials"
+  ],
+  "author": "luffysolution-svg",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/luffysolution-svg/mcp-materials-project.git",
+    "directory": "skills"
+  },
+  "bugs": {
+    "url": "https://github.com/luffysolution-svg/mcp-materials-project/issues"
+  },
+  "homepage": "https://github.com/luffysolution-svg/mcp-materials-project/tree/main/skills",
+  "dependencies": {},
+  "peerDependencies": {
+    "mp-api": ">=0.39.0",
+    "pandas": ">=2.0.0",
+    "openpyxl": ">=3.1.0"
+  },
+  "engines": {
+    "python": ">=3.10"
+  }
+}

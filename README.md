@@ -2,8 +2,20 @@
 
 An MCP (Model Context Protocol) server that provides access to the [Materials Project](https://materialsproject.org/) database for querying material properties, crystal structures, and phase diagrams.
 
+**Also includes Claude Code Skills** for direct terminal access via slash commands!
+
 [![PyPI version](https://badge.fury.io/py/mcp-materials-project.svg)](https://pypi.org/project/mcp-materials-project/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 🎯 Two Ways to Use
+
+### 1. MCP Server (for Claude Desktop/Code)
+Use as an MCP server for natural language queries through Claude
+
+### 2. Skills (for Claude Code CLI)
+Use as slash commands (`/materials-search`, `/materials-export`, `/materials-compare`) directly in your terminal
+
+---
 
 ## Features
 
@@ -150,6 +162,37 @@ The server provides access to comprehensive material properties including:
 - **Magnetic**: Magnetization, magnetic ordering
 - **Structural**: Crystal structure, symmetry, lattice parameters
 - **Chemical**: Composition, elements, formula
+
+## 🎮 Using Skills (Claude Code CLI)
+
+For direct terminal access with slash commands, see the [Skills README](skills/README.md).
+
+### Quick Start
+
+```bash
+# Install dependencies
+pip install mp-api pandas openpyxl
+
+# Set API key
+export MP_API_KEY=your_api_key_here
+
+# Copy skills configuration
+cp skills/skills.json .claude/skills.json
+
+# Use in Claude Code
+/materials-search --formula Si
+/materials-export --band-gap-min 1.0 --band-gap-max 3.0 --stable
+/materials-compare mp-149 mp-2534
+```
+
+**Available Skills:**
+- `/materials-search` - Search materials database
+- `/materials-export` - Export to Excel
+- `/materials-compare` - Compare materials
+
+See [skills/README.md](skills/README.md) for detailed documentation.
+
+---
 
 ## License
 
