@@ -111,31 +111,80 @@ def compare_materials(material_ids):
 
 
 def print_comparison_table(comparison):
-    """Print comparison in table format"""
+    """Print comparison in horizontal table format"""
     if not comparison:
         return
 
-    print(f"\n📊 Materials Comparison")
-    print(f"{'='*80}\n")
+    # Define properties to display
+    properties = [
+        ("Material_ID", "material_id", ""),
+        ("Formula", "formula", ""),
+        ("Band_Gap_eV", "band_gap", ""),
+        ("Energy_Above_Hull", "energy_above_hull", " eV/atom"),
+        ("Is_Stable", "is_stable", ""),
+        ("Is_Metal", "is_metal", ""),
+        ("Formation_Energy", "formation_energy", " eV/atom"),
+        ("Density", "density", " g/cm³"),
+        ("Volume", "volume", " Ų"),
+        ("N_Sites", "n_sites", ""),
+        ("Space_Group_Symbol", "space_group", ""),
+        ("Crystal_System", "crystal_system", ""),
+    ]
 
-    # Print each material
-    for i, mat in enumerate(comparison, 1):
-        print(f"[{i}] {mat['formula']} ({mat['material_id']})")
-        print(f"    {'─'*70}")
-        print(f"    Band Gap:          {mat['band_gap']} eV")
-        print(f"    Is Metal:          {mat['is_metal']}")
-        print(f"    Formation Energy:  {mat['formation_energy']} eV/atom")
-        print(f"    E above hull:      {mat['energy_above_hull']} eV/atom")
-        print(f"    Stable:            {mat['is_stable']}")
-        print(f"    Density:           {mat['density']} g/cm³")
-        print(f"    Volume:            {mat['volume']} Ų")
-        print(f"    Sites:             {mat['n_sites']}")
-        print(f"    Magnetic:          {mat['is_magnetic']}")
-        if mat['magnetization']:
-            print(f"    Magnetization:     {mat['magnetization']}")
-        print(f"    Space Group:       {mat['space_group']}")
-        print(f"    Crystal System:    {mat['crystal_system']}")
-        print()
+    # Calculate column widths
+    prop_width = max(len(prop[0]) for prop in properties)
+    col_widths = []
+
+    for mat in comparison:
+        formula = mat.get('formula', 'N/A')
+        mat_id = mat.get('material_id', 'N/A')
+        header = f"{formula} ({mat_id})"
+        col_widths.append(max(20, len(header) + 2))
+
+    # Print title
+    print(f"\n合并文件包含{len(comparison)}个关键属性列:")
+
+    # Print top border
+    print("┌" + "─" * prop_width + "┬" + "┬".join("─" * w for w in col_widths) + "┐")
+
+    # Print header row
+    header_cells = []
+    for mat in comparison:
+        formula = mat.get('formula', 'N/A')
+        mat_id = mat.get('material_id', 'N/A')
+        header_cells.append(f"{formula} ({mat_id})")
+
+    header_line = "│" + "属性".ljust(prop_width) + "│"
+    for i, cell in enumerate(header_cells):
+        header_line += cell.center(col_widths[i]) + "│"
+    print(header_line)
+
+    # Print separator after header
+    print("├" + "─" * prop_width + "┼" + "┼".join("─" * w for w in col_widths) + "┤")
+
+    # Print data rows
+    for prop_name, prop_key, unit in properties:
+        row = "│" + prop_name.ljust(prop_width) + "│"
+        for i, mat in enumerate(comparison):
+            value = mat.get(prop_key)
+            if value is None:
+                cell_value = "N/A"
+            elif isinstance(value, bool):
+                cell_value = str(value)
+            elif isinstance(value, float):
+                cell_value = f"{value:.4g}{unit}"
+            else:
+                cell_value = f"{value}{unit}"
+            row += cell_value.center(col_widths[i]) + "│"
+        print(row)
+
+        # Print separator between rows
+        if prop_name != properties[-1][0]:
+            print("├" + "─" * prop_width + "┼" + "┼".join("─" * w for w in col_widths) + "┤")
+
+    # Print bottom border
+    print("└" + "─" * prop_width + "┴" + "┴".join("─" * w for w in col_widths) + "┘")
+    print()
 
 
 def main():

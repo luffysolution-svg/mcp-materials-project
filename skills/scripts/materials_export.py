@@ -152,6 +152,8 @@ def export_materials(args):
             # Build search parameters
             if args.material_id:
                 search_params["material_ids"] = [args.material_id]
+            elif args.material_ids:
+                search_params["material_ids"] = [mid.strip() for mid in args.material_ids.split(",")]
             if args.formula:
                 search_params["formula"] = args.formula
             if args.elements:
@@ -196,6 +198,10 @@ def export_materials(args):
 
             if args.output:
                 filename = args.output if args.output.endswith('.xlsx') else f"{args.output}.xlsx"
+            elif args.material_ids:
+                # Use first material ID for filename when comparing multiple
+                first_id = args.material_ids.split(",")[0].strip()
+                filename = f"{first_id}_comparison_{timestamp}.xlsx"
             elif args.material_id:
                 filename = f"{args.material_id}_{timestamp}.xlsx"
             elif args.formula:
@@ -251,6 +257,9 @@ Examples:
   # Export specific material
   python materials_export.py --material-id mp-149 --output silicon.xlsx
 
+  # Export and compare multiple materials
+  python materials_export.py --material-ids mp-390,mp-672 --output TiO2_CdS_comparison.xlsx
+
   # Export semiconductors
   python materials_export.py --band-gap-min 1.0 --band-gap-max 3.0 --stable --limit 20
 
@@ -260,6 +269,7 @@ Examples:
     )
 
     parser.add_argument("--material-id", help="Material ID (e.g., mp-149)")
+    parser.add_argument("--material-ids", help="Comma-separated Material IDs (e.g., mp-149,mp-390,mp-672)")
     parser.add_argument("--formula", help="Chemical formula (e.g., Si, Fe2O3)")
     parser.add_argument("--elements", help="Comma-separated elements (e.g., Li,Fe,O)")
     parser.add_argument("--chemsys", help="Chemical system (e.g., Li-Fe-O)")
