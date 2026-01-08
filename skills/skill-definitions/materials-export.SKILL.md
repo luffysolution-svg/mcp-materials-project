@@ -25,8 +25,10 @@ All search parameters from materials-search PLUS:
 When user requests Excel export, execute:
 
 ```bash
-python C:\Users\CSC\.claude\materials-skills\scripts\materials_export.py [OPTIONS]
+python ~/.claude/skills/materials-export/materials_export.py [OPTIONS]
 ```
+
+**Note**: On Windows, use `%USERPROFILE%\.claude\skills\materials-export\materials_export.py`
 
 **Required Environment**: MP_API_KEY must be set
 

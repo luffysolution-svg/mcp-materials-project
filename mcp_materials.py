@@ -702,6 +702,134 @@ def _style_excel_workbook(ws, df: pd.DataFrame):
     ws.freeze_panes = 'B2'
 
 
+def _create_comparison_excel(materials_data: List[dict], output_path: str):
+    """Create horizontal comparison Excel format for multiple materials"""
+    if not materials_data:
+        return
+
+    # Define key properties to include in comparison (prioritize most important fields)
+    properties = [
+        ('Material_ID', 'Material_ID'),
+        ('Formula', 'Formula'),
+        ('Band_Gap_eV', 'Band_Gap_eV'),
+        ('Energy_Above_Hull_eV_Atom', 'Energy_Above_Hull_eV_Atom'),
+        ('Is_Stable', 'Is_Stable'),
+        ('Is_Metal', 'Is_Metal'),
+        ('Is_Magnetic', 'Is_Magnetic'),
+        ('Formation_Energy_eV_Atom', 'Formation_Energy_eV_Atom'),
+        ('Density_g_cm3', 'Density_g_cm3'),
+        ('Volume_A3', 'Volume_A3'),
+        ('N_Sites', 'N_Sites'),
+        ('N_Elements', 'N_Elements'),
+        ('Elements', 'Elements'),
+        ('Space_Group_Symbol', 'Space_Group_Symbol'),
+        ('Space_Group_Number', 'Space_Group_Number'),
+        ('Crystal_System', 'Crystal_System'),
+        ('Point_Group', 'Point_Group'),
+        ('CBM_eV', 'CBM_eV'),
+        ('VBM_eV', 'VBM_eV'),
+        ('Fermi_Energy_eV', 'Fermi_Energy_eV'),
+        ('Is_Gap_Direct', 'Is_Gap_Direct'),
+        ('Total_Magnetization', 'Total_Magnetization'),
+        ('Magnetic_Ordering', 'Magnetic_Ordering'),
+        ('Bulk_Modulus_VRH_GPa', 'Bulk_Modulus_VRH_GPa'),
+        ('Shear_Modulus_VRH_GPa', 'Shear_Modulus_VRH_GPa'),
+        ('Poisson_Ratio', 'Poisson_Ratio'),
+        ('Dielectric_Total', 'Dielectric_Total'),
+        ('Refractive_Index_n', 'Refractive_Index_n'),
+        ('Surface_Energy_J_m2', 'Surface_Energy_J_m2'),
+        ('Work_Function_eV', 'Work_Function_eV'),
+    ]
+
+    # Create workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Materials Comparison"
+
+    # Define styles
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=12)
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    property_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+    property_font = Font(bold=True, size=11)
+    property_alignment = Alignment(horizontal="left", vertical="center")
+
+    data_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    border = Border(
+        left=Side(style='thin', color='000000'),
+        right=Side(style='thin', color='000000'),
+        top=Side(style='thin', color='000000'),
+        bottom=Side(style='thin', color='000000')
+    )
+
+    # Write header row (material names)
+    ws.cell(1, 1, "Property").fill = header_fill
+    ws.cell(1, 1).font = header_font
+    ws.cell(1, 1).alignment = header_alignment
+    ws.cell(1, 1).border = border
+
+    for col_idx, mat in enumerate(materials_data, start=2):
+        formula = mat.get('Formula', 'N/A')
+        mat_id = mat.get('Material_ID', 'N/A')
+        header_text = f"{formula} ({mat_id})"
+        cell = ws.cell(1, col_idx, header_text)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+        cell.border = border
+
+    # Write data rows
+    for row_idx, (prop_display, prop_key) in enumerate(properties, start=2):
+        # Property name in first column
+        cell = ws.cell(row_idx, 1, prop_display)
+        cell.fill = property_fill
+        cell.font = property_font
+        cell.alignment = property_alignment
+        cell.border = border
+
+        # Material values in subsequent columns
+        for col_idx, mat in enumerate(materials_data, start=2):
+            value = mat.get(prop_key, None)
+
+            # Format value - convert to string first to avoid comparison issues
+            if value is None or value == '':
+                display_value = 'N/A'
+            elif isinstance(value, bool):
+                display_value = str(value)
+            elif isinstance(value, (int, float)):
+                if isinstance(value, float):
+                    display_value = f"{value:.4g}"
+                else:
+                    display_value = str(value)
+            else:
+                # Convert to string first
+                str_value = str(value)
+                display_value = str_value if str_value else 'N/A'
+
+            cell = ws.cell(row_idx, col_idx, display_value)
+            cell.alignment = data_alignment
+            cell.border = border
+
+    # Set column widths
+    ws.column_dimensions['A'].width = 30  # Property column
+    for col_idx in range(2, len(materials_data) + 2):
+        col_letter = get_column_letter(col_idx)
+        ws.column_dimensions[col_letter].width = 25  # Material columns
+
+    # Set row heights
+    ws.row_dimensions[1].height = 30  # Header row
+    for row_idx in range(2, len(properties) + 2):
+        ws.row_dimensions[row_idx].height = 25
+
+    # Freeze panes
+    ws.freeze_panes = 'B2'
+
+    # Save workbook
+    wb.save(output_path)
+
+
 @mcp.tool
 def export_to_excel(
     material_ids: Optional[str] = None,
@@ -777,54 +905,67 @@ def export_to_excel(
             # Auto-generate filename based on query
             if material_ids:
                 first_id = material_ids.split(',')[0].strip()
-                filename = f"{first_id}_{timestamp}.xlsx"
+                # Check if comparing multiple materials
+                if ',' in material_ids and len(materials_data) >= 2:
+                    filename = f"{first_id}_comparison_{timestamp}.xlsx"
+                else:
+                    filename = f"{first_id}_{timestamp}.xlsx"
             elif formula:
                 filename = f"{formula}_{timestamp}.xlsx"
             else:
                 filename = f"materials_export_{timestamp}.xlsx"
             output_path = os.path.join(output_dir, filename)
 
-        # Create Excel workbook
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Materials Data"
+        # Determine format: use horizontal comparison for multiple materials with material_ids
+        use_comparison_format = material_ids and ',' in material_ids and len(materials_data) >= 2
 
-        df = pd.DataFrame(materials_data)
+        if use_comparison_format:
+            # Use horizontal comparison format
+            _create_comparison_excel(materials_data, output_path)
+        else:
+            # Use traditional vertical format
+            # Create Excel workbook
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Materials Data"
 
-        # Priority column ordering
-        priority_cols = [
-            'Material_ID', 'Formula', 'Band_Gap_eV', 'Energy_Above_Hull_eV_Atom',
-            'Space_Group_Symbol', 'Is_Stable', 'Is_Metal', 'Is_Magnetic',
-            'Formation_Energy_eV_Atom', 'Density_g_cm3', 'Volume_A3',
-            'Crystal_System', 'N_Sites', 'N_Elements', 'Elements',
-            'Bulk_Modulus_VRH_GPa', 'Shear_Modulus_VRH_GPa',
-            'Total_Magnetization', 'Structure_Details', 'Full_Properties'
-        ]
+            df = pd.DataFrame(materials_data)
 
-        existing_priority = [c for c in priority_cols if c in df.columns]
-        other_cols = [c for c in df.columns if c not in priority_cols]
-        df = df[existing_priority + other_cols]
+            # Priority column ordering
+            priority_cols = [
+                'Material_ID', 'Formula', 'Band_Gap_eV', 'Energy_Above_Hull_eV_Atom',
+                'Space_Group_Symbol', 'Is_Stable', 'Is_Metal', 'Is_Magnetic',
+                'Formation_Energy_eV_Atom', 'Density_g_cm3', 'Volume_A3',
+                'Crystal_System', 'N_Sites', 'N_Elements', 'Elements',
+                'Bulk_Modulus_VRH_GPa', 'Shear_Modulus_VRH_GPa',
+                'Total_Magnetization', 'Structure_Details', 'Full_Properties'
+            ]
 
-        # Write data to worksheet
-        for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=True), 1):
-            for c_idx, value in enumerate(row, 1):
-                cell_value = str(value) if value is not None and value != '' else ""
-                ws.cell(row=r_idx, column=c_idx, value=cell_value)
+            existing_priority = [c for c in priority_cols if c in df.columns]
+            other_cols = [c for c in df.columns if c not in priority_cols]
+            df = df[existing_priority + other_cols]
 
-        # Apply styling
-        _style_excel_workbook(ws, df)
+            # Write data to worksheet
+            for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=True), 1):
+                for c_idx, value in enumerate(row, 1):
+                    cell_value = str(value) if value is not None and value != '' else ""
+                    ws.cell(row=r_idx, column=c_idx, value=cell_value)
 
-        # Set row height for better readability
-        for row_idx in range(2, ws.max_row + 1):
-            ws.row_dimensions[row_idx].height = 60
+            # Apply styling
+            _style_excel_workbook(ws, df)
 
-        wb.save(output_path)
+            # Set row height for better readability
+            for row_idx in range(2, ws.max_row + 1):
+                ws.row_dimensions[row_idx].height = 60
+
+            wb.save(output_path)
 
         return json.dumps({
             "status": "success",
             "message": f"Exported {len(materials_data)} materials to Excel",
             "file_path": output_path,
             "num_materials": len(materials_data),
+            "format": "horizontal_comparison" if use_comparison_format else "vertical_list",
             "timestamp": datetime.now().isoformat()
         }, indent=2)
 

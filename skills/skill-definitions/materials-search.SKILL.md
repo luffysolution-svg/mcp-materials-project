@@ -30,8 +30,10 @@ Available search criteria:
 When user requests materials search, execute:
 
 ```bash
-python C:\Users\CSC\.claude\materials-skills\scripts\materials_search.py [OPTIONS]
+python ~/.claude/skills/materials-search/materials_search.py [OPTIONS]
 ```
+
+**Note**: On Windows, use `%USERPROFILE%\.claude\skills\materials-search\materials_search.py`
 
 **Required Environment**: MP_API_KEY must be set
 

@@ -24,8 +24,10 @@ version: 1.0.0
 When user requests material comparison, execute:
 
 ```bash
-python C:\Users\CSC\.claude\materials-skills\scripts\materials_compare.py [MATERIAL_IDS] [OPTIONS]
+python ~/.claude/skills/materials-compare/materials_compare.py [MATERIAL_IDS] [OPTIONS]
 ```
+
+**Note**: On Windows, use `%USERPROFILE%\.claude\skills\materials-compare\materials_compare.py`
 
 **Required Environment**: MP_API_KEY must be set
 
