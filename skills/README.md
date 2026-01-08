@@ -14,22 +14,28 @@ Three powerful skills for materials science research:
 
 ### Quick Install (Recommended) ⭐
 
-Use the automated installer for global setup:
+Use the automated installer for correct SKILL.md format:
 
 **Windows:**
 ```cmd
 cd mcp-materials-project
-skills\install-global-windows.bat
+skills\install-skills-windows.bat
 ```
 
 **Linux/macOS:**
 ```bash
 cd mcp-materials-project
-chmod +x skills/install-global-unix.sh
-./skills/install-global-unix.sh
+chmod +x skills/install-skills-unix.sh
+./skills/install-skills-unix.sh
 ```
 
-This installs skills **globally** - available in all projects!
+This installs skills in the **correct Claude Code format**:
+- Creates `~/.claude/skills/materials-xxx/` directories
+- Copies `SKILL.md` files (required by Claude Code)
+- Copies Python scripts
+- Skills available in **all projects**!
+
+**Important**: Restart Claude Code after installation to load the skills.
 
 ---
 
