@@ -1,5 +1,38 @@
 # Quick Installation Guide for Skills
 
+## Choose Your Installation Method
+
+### Method 1: Automated Global Installation (Recommended) ⭐
+
+Use the automated installer script for easy global setup.
+
+**Windows:**
+```cmd
+cd mcp-materials-project
+skills\install-global-windows.bat
+```
+
+**Linux/macOS:**
+```bash
+cd mcp-materials-project
+chmod +x skills/install-global-unix.sh
+./skills/install-global-unix.sh
+```
+
+The script will:
+- ✅ Check Python installation
+- ✅ Install dependencies (mp-api, pandas, openpyxl)
+- ✅ Create global directory (~/.claude/materials-skills)
+- ✅ Copy scripts to global location
+- ✅ Create global skills.json configuration
+- ✅ Test the installation
+
+After installation, skills will be available in **all projects** and directories!
+
+---
+
+### Method 2: Manual Installation
+
 ## 1. Install Dependencies
 
 ```bash

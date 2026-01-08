@@ -12,6 +12,29 @@ Three powerful skills for materials science research:
 
 ## 📦 Installation
 
+### Quick Install (Recommended) ⭐
+
+Use the automated installer for global setup:
+
+**Windows:**
+```cmd
+cd mcp-materials-project
+skills\install-global-windows.bat
+```
+
+**Linux/macOS:**
+```bash
+cd mcp-materials-project
+chmod +x skills/install-global-unix.sh
+./skills/install-global-unix.sh
+```
+
+This installs skills **globally** - available in all projects!
+
+---
+
+### Manual Installation
+
 ### Prerequisites
 
 ```bash
