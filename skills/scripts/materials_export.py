@@ -91,6 +91,118 @@ def process_material_doc(doc):
     return result
 
 
+def create_comparison_excel(materials_data, output_path):
+    """Create horizontal comparison Excel format"""
+    if not materials_data:
+        return
+
+    # Define all properties to include
+    properties = [
+        ('Material_ID', 'Material_ID'),
+        ('Formula', 'Formula'),
+        ('Band_Gap_eV', 'Band_Gap_eV'),
+        ('Energy_Above_Hull_eV_Atom', 'Energy_Above_Hull_eV_Atom'),
+        ('Is_Stable', 'Is_Stable'),
+        ('Is_Metal', 'Is_Metal'),
+        ('Formation_Energy_eV_Atom', 'Formation_Energy_eV_Atom'),
+        ('Density_g_cm3', 'Density_g_cm3'),
+        ('Volume_A3', 'Volume_A3'),
+        ('N_Sites', 'N_Sites'),
+        ('Elements', 'Elements'),
+        ('Space_Group_Symbol', 'Space_Group_Symbol'),
+        ('Space_Group_Number', 'Space_Group_Number'),
+        ('Crystal_System', 'Crystal_System'),
+    ]
+
+    # Create workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Materials Comparison"
+
+    # Define styles
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=12)
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    property_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+    property_font = Font(bold=True, size=11)
+    property_alignment = Alignment(horizontal="left", vertical="center")
+
+    data_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    border = Border(
+        left=Side(style='thin', color='000000'),
+        right=Side(style='thin', color='000000'),
+        top=Side(style='thin', color='000000'),
+        bottom=Side(style='thin', color='000000')
+    )
+
+    # Write header row (material names)
+    ws.cell(1, 1, "属性").fill = header_fill
+    ws.cell(1, 1).font = header_font
+    ws.cell(1, 1).alignment = header_alignment
+    ws.cell(1, 1).border = border
+
+    for col_idx, mat in enumerate(materials_data, start=2):
+        formula = mat.get('Formula', 'N/A')
+        mat_id = mat.get('Material_ID', 'N/A')
+        header_text = f"{formula} ({mat_id})"
+        cell = ws.cell(1, col_idx, header_text)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+        cell.border = border
+
+    # Write data rows
+    for row_idx, (prop_display, prop_key) in enumerate(properties, start=2):
+        # Property name in first column
+        cell = ws.cell(row_idx, 1, prop_display)
+        cell.fill = property_fill
+        cell.font = property_font
+        cell.alignment = property_alignment
+        cell.border = border
+
+        # Material values in subsequent columns
+        for col_idx, mat in enumerate(materials_data, start=2):
+            value = mat.get(prop_key, None)
+
+            # Format value - convert to string first to avoid MPID comparison issues
+            if value is None:
+                display_value = 'N/A'
+            elif isinstance(value, bool):
+                display_value = str(value)
+            elif isinstance(value, (int, float)):
+                if isinstance(value, float):
+                    display_value = f"{value:.4g}"
+                else:
+                    display_value = str(value)
+            else:
+                # Convert to string first
+                str_value = str(value)
+                display_value = str_value if str_value else 'N/A'
+
+            cell = ws.cell(row_idx, col_idx, display_value)
+            cell.alignment = data_alignment
+            cell.border = border
+
+    # Set column widths
+    ws.column_dimensions['A'].width = 30  # Property column
+    for col_idx in range(2, len(materials_data) + 2):
+        col_letter = get_column_letter(col_idx)
+        ws.column_dimensions[col_letter].width = 25  # Material columns
+
+    # Set row heights
+    ws.row_dimensions[1].height = 30  # Header row
+    for row_idx in range(2, len(properties) + 2):
+        ws.row_dimensions[row_idx].height = 25
+
+    # Freeze panes
+    ws.freeze_panes = 'B2'
+
+    # Save workbook
+    wb.save(output_path)
+
+
 def style_excel_workbook(ws, df):
     """Apply professional styling to Excel worksheet"""
     header_fill = PatternFill(start_color="DDEBF7", end_color="DDEBF7", fill_type="solid")
@@ -144,16 +256,14 @@ def export_materials(args):
 
     try:
         with MPRester(api_key) as mpr:
-            search_params = {
-                "num_chunks": 1,
-                "chunk_size": args.limit
-            }
+            search_params = {}
 
             # Build search parameters
             if args.material_id:
                 search_params["material_ids"] = [args.material_id]
             elif args.material_ids:
                 search_params["material_ids"] = [mid.strip() for mid in args.material_ids.split(",")]
+
             if args.formula:
                 search_params["formula"] = args.formula
             if args.elements:
@@ -179,6 +289,11 @@ def export_materials(args):
                 "volume", "nsites", "elements", "symmetry"
             ]
             search_params["fields"] = fields
+
+            # Only add chunk parameters if not searching by specific material IDs
+            if not (args.material_id or args.material_ids):
+                search_params["num_chunks"] = 1
+                search_params["chunk_size"] = args.limit
 
             docs = mpr.materials.summary.search(**search_params)
 
@@ -211,27 +326,35 @@ def export_materials(args):
 
             output_path = output_dir / filename
 
-            # Create Excel workbook
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "Materials Data"
+            # Check if this is a comparison (multiple materials with --material-ids)
+            use_comparison_format = args.material_ids and len(materials_data) >= 2
 
-            df = pd.DataFrame(materials_data)
+            if use_comparison_format:
+                # Use horizontal comparison format
+                create_comparison_excel(materials_data, output_path)
+            else:
+                # Use traditional vertical format
+                # Create Excel workbook
+                wb = Workbook()
+                ws = wb.active
+                ws.title = "Materials Data"
 
-            # Write data
-            for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=True), 1):
-                for c_idx, value in enumerate(row, 1):
-                    cell_value = str(value) if value is not None and value != '' else ""
-                    ws.cell(row=r_idx, column=c_idx, value=cell_value)
+                df = pd.DataFrame(materials_data)
 
-            # Apply styling
-            style_excel_workbook(ws, df)
+                # Write data
+                for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=True), 1):
+                    for c_idx, value in enumerate(row, 1):
+                        cell_value = str(value) if value is not None and value != '' else ""
+                        ws.cell(row=r_idx, column=c_idx, value=cell_value)
 
-            # Set row height
-            for row_idx in range(2, ws.max_row + 1):
-                ws.row_dimensions[row_idx].height = 40
+                # Apply styling
+                style_excel_workbook(ws, df)
 
-            wb.save(output_path)
+                # Set row height
+                for row_idx in range(2, ws.max_row + 1):
+                    ws.row_dimensions[row_idx].height = 40
+
+                wb.save(output_path)
 
             return {
                 "status": "success",
@@ -241,8 +364,10 @@ def export_materials(args):
             }
 
     except Exception as e:
+        import traceback
         return {
             "error": str(e),
+            "traceback": traceback.format_exc(),
             "status": "error",
             "timestamp": datetime.now().isoformat()
         }
