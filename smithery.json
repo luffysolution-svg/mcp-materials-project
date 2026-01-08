@@ -2,7 +2,7 @@
   "name": "materials-project",
   "displayName": "Materials Project",
   "description": "MCP Server for Materials Project database - query material properties, crystal structures, and phase diagrams",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "luffysolution-svg",
   "license": "MIT",
   "repository": {
@@ -45,6 +45,10 @@
       {
         "name": "compare_materials",
         "description": "Compare multiple materials side by side with key properties"
+      },
+      {
+        "name": "export_to_excel",
+        "description": "Export material data to professionally formatted Excel file"
       }
     ]
   },

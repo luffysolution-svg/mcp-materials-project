@@ -14,6 +14,7 @@ An MCP (Model Context Protocol) server that provides access to the [Materials Pr
 - **search_materials_by_property**: Search by specific property ranges (band gap, bulk modulus, density, etc.)
 - **get_phase_diagram_info**: Get phase diagram entries and stability information for chemical systems
 - **compare_materials**: Compare multiple materials side by side with key properties
+- **export_to_excel**: Export material data to professionally formatted Excel files
 
 ## Installation
 
@@ -129,6 +130,14 @@ Once configured, you can interact with the Materials Project database through na
 ```
 "Show me the phase diagram for the Li-Fe-O system"
 "What are the stable phases in the Si-O chemical system?"
+```
+
+### Export to Excel
+
+```
+"Export silicon materials to Excel"
+"Export all stable materials with band gap > 2 eV to Excel file named 'semiconductors.xlsx'"
+"Search for Fe-O magnetic materials and export to Excel"
 ```
 
 ## Data Available
