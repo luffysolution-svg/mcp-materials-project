@@ -38,6 +38,11 @@ def serialize_object(obj: Any) -> Any:
     if hasattr(obj, 'tolist'):
         return obj.tolist()
 
+    # Handle pymatgen Element objects - extract symbol directly
+    if hasattr(obj, 'symbol') and hasattr(obj, 'Z'):
+        # This is likely a pymatgen Element object
+        return str(obj.symbol)
+
     # Handle pymatgen objects with as_dict
     if hasattr(obj, 'as_dict'):
         return serialize_object(obj.as_dict())
@@ -210,14 +215,29 @@ def process_material_doc(doc: Any) -> dict:
     result['Formula_Anonymous'] = doc_dict.get('formula_anonymous', '')
     result['Chemical_System'] = doc_dict.get('chemsys', '')
 
-    # Handle elements - can be list of strings or list of dicts
+    # Handle elements - can be list of strings or list of Element objects
     elements = doc_dict.get('elements', [])
     if elements:
-        if isinstance(elements[0], dict):
-            # Extract element symbols from dict
-            result['Elements'] = ', '.join(str(e.get('element', e)) if isinstance(e, dict) else str(e) for e in elements)
-        else:
-            result['Elements'] = ', '.join(str(e) for e in elements)
+        # After serialize_object, Element objects should be converted to strings
+        # But we still need to handle various formats
+        element_symbols = []
+        for e in elements:
+            if isinstance(e, str):
+                element_symbols.append(e)
+            elif isinstance(e, dict):
+                # Try to extract element symbol from dict
+                if 'symbol' in e:
+                    element_symbols.append(str(e['symbol']))
+                elif 'element' in e:
+                    element_symbols.append(str(e['element']))
+                elif '_value_' in e:
+                    element_symbols.append(str(e['_value_']))
+                else:
+                    # Fallback to string representation
+                    element_symbols.append(str(e))
+            else:
+                element_symbols.append(str(e))
+        result['Elements'] = ', '.join(element_symbols)
     else:
         result['Elements'] = ''
 
