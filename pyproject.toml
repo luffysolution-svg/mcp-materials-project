@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-materials-project"
-version = "0.3.2"
+version = "0.3.3"
 description = "MCP Server for Materials Project database - query material properties, crystal structures, and phase diagrams with horizontal comparison Excel export"
 readme = "README.md"
 license = "MIT"

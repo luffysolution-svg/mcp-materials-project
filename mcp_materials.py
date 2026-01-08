@@ -334,8 +334,7 @@ def process_material_doc(doc: Any) -> dict:
     return result
 
 
-@mcp.tool
-def fetch_full_material_data(
+def _fetch_material_data_core(
     material_ids: Optional[str] = None,
     formula: Optional[str] = None,
     chemsys: Optional[str] = None,
@@ -346,25 +345,10 @@ def fetch_full_material_data(
     is_metal: Optional[bool] = None,
     is_magnetic: Optional[bool] = None,
     num_results: int = 10
-) -> str:
+) -> dict:
     """
-    Fetch full material data from Materials Project using summary.search.
-
-    Args:
-        material_ids: Comma-separated material IDs (e.g., "mp-149,mp-1234")
-        formula: Chemical formula (e.g., "Si", "Fe2O3")
-        chemsys: Chemical system (e.g., "Li-Fe-O")
-        elements: Comma-separated elements to include (e.g., "Si,O")
-        band_gap_min: Minimum band gap in eV
-        band_gap_max: Maximum band gap in eV
-        is_stable: Filter for thermodynamically stable materials
-        is_metal: Filter for metallic materials
-        is_magnetic: Filter for magnetic materials
-        num_results: Maximum number of results (default 10)
-
-    Returns:
-        JSON string with full material data including thermodynamic, electronic,
-        mechanical, magnetic, and symmetry properties.
+    Core function to fetch material data from Materials Project.
+    Returns a dictionary with status and data.
     """
     try:
         with MPRester(API_KEY) as mpr:
@@ -407,7 +391,7 @@ def fetch_full_material_data(
                 processed = process_material_doc(doc)
                 results.append(processed)
 
-            output = {
+            return {
                 "status": "success",
                 "count": len(results),
                 "query_params": {k: str(v) for k, v in search_params.items() if k != "fields"},
@@ -415,14 +399,59 @@ def fetch_full_material_data(
                 "timestamp": datetime.now().isoformat()
             }
 
-            return json.dumps(output, indent=2, default=str)
-
     except Exception as e:
-        return json.dumps({
+        return {
             "status": "error",
             "message": str(e),
             "timestamp": datetime.now().isoformat()
-        }, indent=2)
+        }
+
+
+@mcp.tool
+def fetch_full_material_data(
+    material_ids: Optional[str] = None,
+    formula: Optional[str] = None,
+    chemsys: Optional[str] = None,
+    elements: Optional[str] = None,
+    band_gap_min: Optional[float] = None,
+    band_gap_max: Optional[float] = None,
+    is_stable: Optional[bool] = None,
+    is_metal: Optional[bool] = None,
+    is_magnetic: Optional[bool] = None,
+    num_results: int = 10
+) -> str:
+    """
+    Fetch full material data from Materials Project using summary.search.
+
+    Args:
+        material_ids: Comma-separated material IDs (e.g., "mp-149,mp-1234")
+        formula: Chemical formula (e.g., "Si", "Fe2O3")
+        chemsys: Chemical system (e.g., "Li-Fe-O")
+        elements: Comma-separated elements to include (e.g., "Si,O")
+        band_gap_min: Minimum band gap in eV
+        band_gap_max: Maximum band gap in eV
+        is_stable: Filter for thermodynamically stable materials
+        is_metal: Filter for metallic materials
+        is_magnetic: Filter for magnetic materials
+        num_results: Maximum number of results (default 10)
+
+    Returns:
+        JSON string with full material data including thermodynamic, electronic,
+        mechanical, magnetic, and symmetry properties.
+    """
+    result = _fetch_material_data_core(
+        material_ids=material_ids,
+        formula=formula,
+        chemsys=chemsys,
+        elements=elements,
+        band_gap_min=band_gap_min,
+        band_gap_max=band_gap_max,
+        is_stable=is_stable,
+        is_metal=is_metal,
+        is_magnetic=is_magnetic,
+        num_results=num_results
+    )
+    return json.dumps(result, indent=2, default=str)
 
 
 @mcp.tool
@@ -898,8 +927,8 @@ def export_to_excel(
         JSON string with export status and file path
     """
     try:
-        # Fetch data using existing function
-        json_result = fetch_full_material_data(
+        # Fetch data using core function (not the MCP tool)
+        result_data = _fetch_material_data_core(
             material_ids=material_ids,
             formula=formula,
             chemsys=chemsys,
@@ -912,10 +941,8 @@ def export_to_excel(
             num_results=num_results
         )
 
-        result_data = json.loads(json_result)
-
         if result_data.get("status") != "success":
-            return json_result
+            return json.dumps(result_data, indent=2)
 
         materials_data = result_data.get("data", [])
 
