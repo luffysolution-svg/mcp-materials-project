@@ -916,56 +916,15 @@ def export_to_excel(
                 filename = f"materials_export_{timestamp}.xlsx"
             output_path = os.path.join(output_dir, filename)
 
-        # Determine format: use horizontal comparison for multiple materials with material_ids
-        use_comparison_format = material_ids and ',' in material_ids and len(materials_data) >= 2
-
-        if use_comparison_format:
-            # Use horizontal comparison format
-            _create_comparison_excel(materials_data, output_path)
-        else:
-            # Use traditional vertical format
-            # Create Excel workbook
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "Materials Data"
-
-            df = pd.DataFrame(materials_data)
-
-            # Priority column ordering
-            priority_cols = [
-                'Material_ID', 'Formula', 'Band_Gap_eV', 'Energy_Above_Hull_eV_Atom',
-                'Space_Group_Symbol', 'Is_Stable', 'Is_Metal', 'Is_Magnetic',
-                'Formation_Energy_eV_Atom', 'Density_g_cm3', 'Volume_A3',
-                'Crystal_System', 'N_Sites', 'N_Elements', 'Elements',
-                'Bulk_Modulus_VRH_GPa', 'Shear_Modulus_VRH_GPa',
-                'Total_Magnetization', 'Structure_Details', 'Full_Properties'
-            ]
-
-            existing_priority = [c for c in priority_cols if c in df.columns]
-            other_cols = [c for c in df.columns if c not in priority_cols]
-            df = df[existing_priority + other_cols]
-
-            # Write data to worksheet
-            for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=True), 1):
-                for c_idx, value in enumerate(row, 1):
-                    cell_value = str(value) if value is not None and value != '' else ""
-                    ws.cell(row=r_idx, column=c_idx, value=cell_value)
-
-            # Apply styling
-            _style_excel_workbook(ws, df)
-
-            # Set row height for better readability
-            for row_idx in range(2, ws.max_row + 1):
-                ws.row_dimensions[row_idx].height = 60
-
-            wb.save(output_path)
+        # Always use horizontal comparison format
+        _create_comparison_excel(materials_data, output_path)
 
         return json.dumps({
             "status": "success",
             "message": f"Exported {len(materials_data)} materials to Excel",
             "file_path": output_path,
             "num_materials": len(materials_data),
-            "format": "horizontal_comparison" if use_comparison_format else "vertical_list",
+            "format": "horizontal_comparison",
             "timestamp": datetime.now().isoformat()
         }, indent=2)
 

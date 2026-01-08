@@ -32,24 +32,23 @@ Use as slash commands (`/materials-search`, `/materials-export`, `/materials-com
 
 ### 📊 Excel Export Formats
 
-#### Horizontal Comparison Format (NEW!)
-- **Triggered by**: Comma-separated material IDs (e.g., `"mp-149,mp-390,mp-672"`)
+#### MCP Server: Horizontal Comparison Format (Always)
 - **Layout**: Properties as rows, materials as columns
-- **Best for**: Side-by-side comparison of 2-10 materials
-- **Includes**: 30+ key properties (band gap, stability, elasticity, magnetism, etc.)
+- **Best for**: Side-by-side comparison and detailed analysis
+- **Includes**: 30+ key properties (band gap, stability, elasticity, magnetism, dielectric, surface properties, etc.)
+- **Works for**: Single material or multiple materials
 
-#### Vertical List Format
-- **Triggered by**: Single material ID or search criteria
-- **Layout**: Materials as rows, properties as columns
-- **Best for**: Search results and bulk data export
-- **Includes**: 60+ comprehensive properties with full details
+#### Skills Scripts: Dual Format
+- **Horizontal Comparison**: Triggered by comma-separated material IDs (e.g., `--material-ids mp-149,mp-390`)
+- **Vertical List**: Triggered by single material ID or search criteria
+- **Includes**: 14 basic properties only
 
 ### 📋 Data Comparison: MCP Server vs Skills Scripts
 
 | Feature | MCP Server | Skills Scripts |
 |---------|-----------|----------------|
 | **Data Fields** | 60+ comprehensive fields | 14 basic fields |
-| **Excel Formats** | Horizontal comparison + Vertical list | Horizontal comparison + Vertical list |
+| **Excel Format** | Horizontal comparison (always) | Horizontal comparison + Vertical list |
 | **Use Case** | Deep research, full analysis | Quick queries, simple comparisons |
 | **Properties Included** | All thermodynamic, electronic, mechanical, magnetic, dielectric, surface properties + structure details | Basic properties only (ID, formula, band gap, stability, density, symmetry) |
 | **File Size** | Larger (complete data) | Smaller (essential data) |
@@ -182,13 +181,11 @@ Once configured, you can interact with the Materials Project database through na
 "Export silicon materials to Excel"
 "Export all stable materials with band gap > 2 eV to Excel file named 'semiconductors.xlsx'"
 "Search for Fe-O magnetic materials and export to Excel"
-
-# NEW: Horizontal comparison format
 "Export and compare mp-149, mp-390, and mp-672 to Excel"
 "Compare these materials in Excel: mp-2534, mp-22862"
 ```
 
-**Note**: When exporting multiple materials with comma-separated IDs, the server automatically uses horizontal comparison format for easier side-by-side analysis.
+**Note**: MCP server always uses horizontal comparison format (properties as rows, materials as columns) for optimal side-by-side analysis.
 
 ## Data Available
 
