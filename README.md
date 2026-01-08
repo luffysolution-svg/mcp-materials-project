@@ -227,6 +227,41 @@ cp skills/skills.json .claude/skills.json
 
 See [skills/README.md](skills/README.md) for detailed documentation.
 
+## 📚 Examples and Tutorials
+
+### 🔬 Complete Usage Example
+
+See our comprehensive [CdS vs TiO₂ comparison example](examples/usage-demo/README.md) that demonstrates:
+
+- ✅ How to use Skills for efficient material searches
+- ✅ When to use MCP tools for detailed data
+- ✅ Complete workflow from search to Excel export
+- ✅ Deep analysis and heterojunction evaluation
+- ✅ Best practices for reducing token consumption
+
+**Key Features Demonstrated:**
+- Material property comparison
+- Band structure analysis
+- Mechanical and optical properties
+- Heterojunction design recommendations
+- Professional Excel report generation
+
+### 🚀 Deployment Guide
+
+For step-by-step installation and configuration instructions, see the [Deployment Guide](examples/DEPLOYMENT_GUIDE.md):
+
+- System requirements
+- API key setup
+- MCP server configuration
+- Skills installation
+- Troubleshooting common issues
+- Verification steps
+
+**Perfect for:**
+- First-time users
+- System administrators
+- Research groups setting up shared environments
+
 ---
 
 ## License
